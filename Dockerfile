@@ -1,4 +1,4 @@
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk-jammy
 
 COPY target/employee.jar app.jar
 
