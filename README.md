@@ -14,11 +14,11 @@ This project demonstrates the full DevOps lifecycle — from code commit to depl
 
 
 🏗️ Tech Stack
-**Category	Technology**     Language	Java
+**Category	Technology**           Language	Java
 
-**Framework	 **              Spring Boot, Hibernate, Spring Cloud
+**Framework	 **                    Spring Boot, Hibernate, Spring Cloud
 
-**API Tools **             	 REST API, Swagger
+**API Tools **             	       REST API, Swagger
 
 **Database **             	 MariaDB, PostgreSQL (AWS RDS)
 
