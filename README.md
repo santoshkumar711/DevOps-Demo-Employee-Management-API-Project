@@ -12,27 +12,20 @@ This project demonstrates the full DevOps lifecycle — from code commit to depl
 - 🔁 CI/CD pipeline setup using **Jenkins (Maven-based build)**  
 - 🧪 API testing with **Postman**, **Swagger**, and **JMeter**
 
-
 🏗️ Tech Stack
-**Category	Technology**           Language	Java
 
-**Framework	 **                    Spring Boot, Hibernate, Spring Cloud
-
-**API Tools **             	       REST API, Swagger
-
-**Database **             	 MariaDB, PostgreSQL (AWS RDS)
-
-**Containerization**	       Docker
-
-**Deployment**	             AWS EC2, AWS ECS
-
-**CI/CD  **               	 Jenkins (Maven-based pipelines)
-
-**Testing**               	 Postman, JMeter
-
-**Version Control**       	 Git / GitHub
-
-**OS	**                     Ubuntu Linux
+| **Category** | **Technology** |
+|---------------|----------------|
+| Language | Java |
+| Framework | Spring Boot, Hibernate, Spring Cloud |
+| API Tools | REST API, Swagger |
+| Database | MariaDB, PostgreSQL (AWS RDS) |
+| Containerization | Docker |
+| Deployment | AWS EC2, AWS ECS |
+| CI/CD | Jenkins (Maven-based pipelines) |
+| Testing | Postman, JMeter |
+| Version Control | Git / GitHub |
+| Operating System | Ubuntu Linux |
 
 ✅ Application will start at local:
 👉 http://localhost:8082/employee
