@@ -1,4 +1,4 @@
-// This script used for docker-compose, if you want to run app using docker-compose pls use this script.
+// This script used for docker-compose, if you want to run app using docker-compose please use this script.
 // This script is fully auto deployment script.
 //pipeline {
 //    agent any
