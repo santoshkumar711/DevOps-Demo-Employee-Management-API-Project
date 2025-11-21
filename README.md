@@ -54,3 +54,30 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
 spring.jpa.show-sql=true
 
 server.port=8082
+
+Cloud Setup (AWS RDS + EC2)
+spring.datasource.url=jdbc:mariadb://ec2-16-170-7-215.eu-north-1.compute.amazonaws.com:3306/employee
+spring.datasource.username=santosh
+spring.datasource.password=santoor711
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
+spring.jpa.show-sql=true
+
+server.port=8082
+
+Docker Commands
+# Build Docker image
+docker build -t employee-app:v1 .
+
+# Run container
+docker run -d -p 8082:8082 employee-app:v1
+
+👨‍💻 Author
+
+Santosh Kumar
+Role: DevOps Engineer
+📧 Email: santoshkumar711711@gmail.com
+
+🌐 GitHub: https://github.com/santoshkumar711/DevOps-Demo-Employee-Management-API-Project
