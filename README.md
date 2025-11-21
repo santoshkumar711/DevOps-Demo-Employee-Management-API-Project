@@ -81,8 +81,3 @@ Role: DevOps Engineer
 📧 Email: santoshkumar711711@gmail.com
 
 🌐 GitHub: https://github.com/santoshkumar711/DevOps-Demo-Employee-Management-API-Project
-
-
-
-
-server.port=8082
