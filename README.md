@@ -52,8 +52,8 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
 spring.jpa.show-sql=true
-
 server.port=8082
+
 
 Cloud Setup (AWS RDS + EC2)
 spring.datasource.url=jdbc:mariadb://ec2-16-170-7-215.eu-north-1.compute.amazonaws.com:3306/employee
