@@ -52,7 +52,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
 spring.jpa.show-sql=true
-server.port=8082
+server.port=8082```
 
 
 ### Cloud Setup (AWS RDS + EC2)
