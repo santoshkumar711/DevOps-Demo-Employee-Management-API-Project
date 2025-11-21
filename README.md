@@ -55,7 +55,7 @@ spring.jpa.show-sql=true
 server.port=8082
 
 
-Cloud Setup (AWS RDS + EC2)
+### Cloud Setup (AWS RDS + EC2)
 spring.datasource.url=jdbc:mariadb://ec2-16-170-7-215.eu-north-1.compute.amazonaws.com:3306/employee
 spring.datasource.username=santosh
 spring.datasource.password=santoor711
@@ -67,7 +67,7 @@ spring.jpa.show-sql=true
 
 server.port=8082
 
-Docker Commands
+🐳Docker Commands
 # Build Docker image
 docker build -t employee-app:v1 .
 
