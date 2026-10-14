@@ -2,7 +2,6 @@ HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
-!**/src/test/**/target/
 
 ### STS ###
 .apt_generated
@@ -31,3 +30,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Local and production configuration
+application-local.properties
+application-prod.properties
+
+# Certificates and private keys
+*.pem
+*.key
+
+# Build artifacts
+target/
+*.jar
