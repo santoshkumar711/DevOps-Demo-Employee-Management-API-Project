@@ -8,20 +8,27 @@ phases:
 
   pre_build:
     commands:
-      - echo "Starting build for Employee Management API"
+      - echo "Starting Employee API build"
       - java -version
       - mvn -version
 
   build:
     commands:
       - mvn clean package -DskipTests
+      - cp target/employee.jar employee.jar
+      - test -f appspec.yml
+      - test -f scripts/stop.sh
+      - test -f scripts/start.sh
 
   post_build:
     commands:
-      - echo "Build completed successfully"
-      - ls -lh target/*.jar
+      - echo "Build completed"
+      - ls -lh employee.jar appspec.yml scripts/stop.sh scripts/start.sh
 
 artifacts:
   files:
-    - target/*.jar
-  discard-paths: yes
+    - employee.jar
+    - appspec.yml
+    - scripts/stop.sh
+    - scripts/start.sh
+  discard-paths: no
