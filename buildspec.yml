@@ -19,11 +19,12 @@ phases:
       - test -f appspec.yml
       - test -f scripts/stop.sh
       - test -f scripts/start.sh
+      - test -f scripts/validate.sh
 
   post_build:
     commands:
       - echo "Build completed"
-      - ls -lh employee.jar appspec.yml scripts/stop.sh scripts/start.sh
+      - ls -lh employee.jar appspec.yml scripts/stop.sh scripts/start.sh scripts/validate.sh
 
 artifacts:
   files:
@@ -31,4 +32,5 @@ artifacts:
     - appspec.yml
     - scripts/stop.sh
     - scripts/start.sh
+    - scripts/validate.sh
   discard-paths: no
