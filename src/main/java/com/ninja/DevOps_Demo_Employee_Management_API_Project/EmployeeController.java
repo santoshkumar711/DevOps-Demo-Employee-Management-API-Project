@@ -30,7 +30,7 @@ public class EmployeeController {
 		logger.error("logger test error");
 		logger.debug("logger test debug");
 		logger.trace("logger test trace");
-		return "This is employee app where deploy in AWS";
+		return "This is employee app where deploy in AWS by Santosh";
 	}
 	
 	@PostMapping("/save")
