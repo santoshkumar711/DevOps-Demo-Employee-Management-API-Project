@@ -2,7 +2,7 @@
 #!/bin/bash
 set -e
 
-HEALTH_URL="http://localhost:8084/actuator/health"
+HEALTH_URL="http://localhost:8084/actuator/health-test"
 
 echo "Waiting for Employee API to become healthy..."
 
