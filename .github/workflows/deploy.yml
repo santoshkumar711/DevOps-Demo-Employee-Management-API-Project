@@ -1,0 +1,137 @@
+name: Deploy Employee API to AWS EC2
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ap-southeast-2
+      S3_BUCKET: santosh-employee-app-2026
+      EC2_INSTANCE_ID: i-033e387f60918a118
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '17'
+          cache: maven
+
+      - name: Build Spring Boot Application
+        run: |
+          mvn clean package -DskipTests
+          test -f target/employee.jar
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload JAR to S3
+        run: |
+          aws s3 cp target/employee.jar \
+            s3://${S3_BUCKET}/github-actions/employee.jar
+
+      - name: Deploy Through AWS Systems Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          REMOTE_SCRIPT=$(cat <<'SCRIPT'
+          set -eu
+
+          APP_DIR="/opt/santosh-api"
+          JAR="$APP_DIR/employee.jar"
+          BACKUP="$APP_DIR/employee.jar.previous"
+          NEW_JAR="/tmp/employee.jar.new"
+          BUCKET="santosh-employee-app-2026"
+
+          aws s3 cp \
+            "s3://$BUCKET/github-actions/employee.jar" \
+            "$NEW_JAR"
+
+          test -s "$NEW_JAR"
+
+          if [ -f "$JAR" ]; then
+            cp "$JAR" "$BACKUP"
+          fi
+
+          install -o root -g root -m 0644 "$NEW_JAR" "$JAR"
+          systemctl restart employee
+
+          for i in $(seq 1 24); do
+            if curl --fail --silent \
+              http://localhost:8084/actuator/health \
+              | grep -q '"status":"UP"'; then
+              echo "Deployment health check passed."
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Health check failed. Attempting rollback."
+
+          if [ -f "$BACKUP" ]; then
+            cp "$BACKUP" "$JAR"
+            systemctl restart employee
+          fi
+
+          exit 1
+          SCRIPT
+          )
+
+          PARAMETERS=$(jq -n --arg cmd "$REMOTE_SCRIPT" \
+            '{commands: [$cmd]}')
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "$PARAMETERS" \
+            --comment "GitHub Actions Employee API deployment" \
+            --query 'Command.CommandId' \
+            --output text)
+
+          echo "SSM Command ID: $COMMAND_ID"
+
+          for i in $(seq 1 60); do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query 'Status' \
+              --output text 2>/dev/null || true)
+
+            if [ "$STATUS" = "Success" ]; then
+              echo "Deployment completed successfully."
+              exit 0
+            fi
+
+            case "$STATUS" in
+              Failed|TimedOut|Cancelled|Cancelling)
+                aws ssm get-command-invocation \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$EC2_INSTANCE_ID" \
+                  --query '{Status:Status,Error:StandardErrorContent,Output:StandardOutputContent}' \
+                  --output json || true
+                exit 1
+                ;;
+            esac
+
+            sleep 5
+          done
+
+          echo "Timed out waiting for SSM command completion."
+          exit 1
