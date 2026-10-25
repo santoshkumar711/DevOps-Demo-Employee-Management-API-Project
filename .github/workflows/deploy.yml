@@ -32,7 +32,7 @@ jobs:
       - name: Build Spring Boot Application
         run: |
           mvn clean package -DskipTests
-          test -f target/employee.jar
+          test -s target/employee.jar
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,12 +44,19 @@ jobs:
       - name: Upload JAR to S3
         run: |
           aws s3 cp target/employee.jar \
-            s3://${S3_BUCKET}/github-actions/employee.jar
+            "s3://${S3_BUCKET}/github-actions/employee.jar"
 
       - name: Deploy Through AWS Systems Manager
         shell: bash
         run: |
           set -euo pipefail
+
+          # Create a temporary download URL valid for 15 minutes.
+          PRESIGNED_URL=$(aws s3 presign \
+            "s3://${S3_BUCKET}/github-actions/employee.jar" \
+            --expires-in 900)
+
+          URL_B64=$(printf '%s' "$PRESIGNED_URL" | base64 -w 0)
 
           REMOTE_SCRIPT=$(cat <<'SCRIPT'
           set -eu
@@ -58,26 +65,33 @@ jobs:
           JAR="$APP_DIR/employee.jar"
           BACKUP="$APP_DIR/employee.jar.previous"
           NEW_JAR="/tmp/employee.jar.new"
-          BUCKET="santosh-employee-app-2026"
 
-          aws s3 cp \
-            "s3://$BUCKET/github-actions/employee.jar" \
-            "$NEW_JAR"
+          PRESIGNED_URL_B64="__URL_B64__"
+          PRESIGNED_URL=$(printf '%s' "$PRESIGNED_URL_B64" | base64 -d)
+
+          echo "Downloading new application JAR..."
+          curl --fail --location --silent --show-error \
+            "$PRESIGNED_URL" -o "$NEW_JAR"
 
           test -s "$NEW_JAR"
 
+          # Preserve the current JAR before replacing it.
           if [ -f "$JAR" ]; then
             cp "$JAR" "$BACKUP"
           fi
 
           install -o root -g root -m 0644 "$NEW_JAR" "$JAR"
+
+          echo "Restarting Employee API..."
           systemctl restart employee
 
+          # Wait up to 120 seconds for the health check.
           for i in $(seq 1 24); do
             if curl --fail --silent \
               http://localhost:8084/actuator/health \
               | grep -q '"status":"UP"'; then
               echo "Deployment health check passed."
+              rm -f "$NEW_JAR"
               exit 0
             fi
             sleep 5
@@ -88,11 +102,16 @@ jobs:
           if [ -f "$BACKUP" ]; then
             cp "$BACKUP" "$JAR"
             systemctl restart employee
+            echo "Previous JAR restored."
+          else
+            echo "No previous JAR backup was available."
           fi
 
           exit 1
           SCRIPT
           )
+
+          REMOTE_SCRIPT="${REMOTE_SCRIPT/__URL_B64__/$URL_B64}"
 
           PARAMETERS=$(jq -n --arg cmd "$REMOTE_SCRIPT" \
             '{commands: [$cmd]}')
@@ -107,6 +126,7 @@ jobs:
 
           echo "SSM Command ID: $COMMAND_ID"
 
+          # Poll SSM for up to 5 minutes.
           for i in $(seq 1 60); do
             STATUS=$(aws ssm get-command-invocation \
               --command-id "$COMMAND_ID" \
