@@ -83,7 +83,7 @@ jobs:
           install -o root -g root -m 0644 "$NEW_JAR" "$JAR"
 
           echo "Restarting Employee API..."
-          systemctl restart employee
+          systemctl restart santosh-api.service
 
           # Wait up to 120 seconds for the health check.
           for i in $(seq 1 24); do
@@ -101,7 +101,7 @@ jobs:
 
           if [ -f "$BACKUP" ]; then
             cp "$BACKUP" "$JAR"
-            systemctl restart employee
+            systemctl restart santosh-api.service
             echo "Previous JAR restored."
           else
             echo "No previous JAR backup was available."
